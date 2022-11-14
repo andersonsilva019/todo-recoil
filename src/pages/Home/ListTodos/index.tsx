@@ -1,3 +1,5 @@
+import { useRecoilValue } from 'recoil'
+import { todosSelector } from '../../../lib/recoil/Selectors'
 import { EmptyList } from './EmptyList'
 import {
   Container,
@@ -8,22 +10,34 @@ import {
 } from './styles'
 import { TodoItem } from './TodoItem'
 
-export function ListTodos() {
+interface ListTodosProps {
+  removeTodo: (id: number) => void
+  changeTodoStatus: (id: number) => void
+}
+
+export function ListTodos({removeTodo, changeTodoStatus}: ListTodosProps) {
+
+  const { todoList, totalNum, totalCompletedNum } = useRecoilValue(todosSelector)
+
   return (
     <Container>
       <HeaderList>
         <CreatedTasks>
           <strong>Tarefas criadas</strong>
-          <span>0</span>
+          <span>{totalNum}</span>
         </CreatedTasks>
         <CompletedTasks>
           <strong>Concluídas</strong>
-          <span>0</span>
+          <span>{totalNum === 0 ? 0 : `${totalCompletedNum} de ${totalNum}`}</span>
         </CompletedTasks>
       </HeaderList>
-      <TodoList>
-        <TodoItem id={1} title='Integer urna interdum massa libero auctor neque turpis turpis semper. Duis vel sed fames integer.'/>
-      </TodoList>
+      {totalNum === 0 ? (
+        <EmptyList />
+      ) : (
+        <TodoList>
+          {todoList.map(todo => <TodoItem key={todo.id} changeTodoStatus={changeTodoStatus} removeTodo={removeTodo} {...todo} />)}
+        </TodoList>
+      )}
     </Container>
   )
 }
